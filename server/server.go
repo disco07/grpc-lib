@@ -43,7 +43,8 @@ func newGPRCServer(lifecycle fx.Lifecycle, logger *slog.Logger, config GRPCConfi
 					logger.Warn(err.Error())
 				}
 			}()
-			logger.With(fmt.Sprintf("%s://%s", listener.Addr().Network(), listener.Addr().String())).Info("Listening")
+
+			logger.Info(fmt.Sprintf("%s://%s", listener.Addr().Network(), listener.Addr().String()))
 
 			return nil
 		},

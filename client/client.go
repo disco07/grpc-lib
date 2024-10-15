@@ -6,16 +6,18 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/disco07/grpc-lib/server"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func newGRPCClientConn(lc fx.Lifecycle) (*grpc.ClientConn, error) {
-	grpcAddr := "localhost:50051"
-
-	conn, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func newGRPCClientConn(lc fx.Lifecycle, grpcServerConfig server.GRPCConfigServer) (*grpc.ClientConn, error) {
+	conn, err := grpc.NewClient(
+		fmt.Sprintf(":%d", grpcServerConfig.Port()),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to order service: %w", err)
 	}
