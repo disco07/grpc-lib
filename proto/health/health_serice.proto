@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package health;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/disco07/grpc-lib/proto/health";
+
+service HealthService {
+  rpc Check(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
