@@ -4,7 +4,7 @@ package health;
 
 import "google/protobuf/empty.proto";
 
-option go_package = "github.com/disco07/grpc-lib/proto/health";
+option go_package = "github.com/disco07/grpc-lib/protogen/go/health";
 
 service HealthService {
   rpc Check(google.protobuf.Empty) returns (google.protobuf.Empty);
