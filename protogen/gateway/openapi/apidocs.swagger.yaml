@@ -9,8 +9,8 @@ consumes:
 produces:
   - application/json
 paths:
-  /health.HealthService/Check:
-    post:
+  /health:
+    get:
       operationId: HealthService_Check
       responses:
         "200":
@@ -22,13 +22,6 @@ paths:
           description: An unexpected error response.
           schema:
             $ref: '#/definitions/rpcStatus'
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            type: object
-            properties: {}
       tags:
         - HealthService
 definitions:
