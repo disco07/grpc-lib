@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -53,6 +54,7 @@ func newGPRCServer(lifecycle fx.Lifecycle, logger *slog.Logger, config GRPCConfi
 		keepaliveOptions,
 		keepaliveEnforcementOptions,
 		grpc.UnaryInterceptor(metadataInterceptor),
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	)
 
 	lifecycle.Append(fx.Hook{

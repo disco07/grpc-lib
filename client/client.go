@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"log"
 	"net/http"
 
@@ -17,6 +18,7 @@ func newGRPCClientConn(lc fx.Lifecycle, grpcServerConfig server.GRPCConfigServer
 	conn, err := grpc.NewClient(
 		fmt.Sprintf(":%d", grpcServerConfig.Port()),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to order service: %w", err)
