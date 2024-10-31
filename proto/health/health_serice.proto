@@ -3,9 +3,14 @@ syntax = "proto3";
 package health;
 
 import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/disco07/grpc-lib/protogen/go/health";
 
 service HealthService {
-  rpc Check(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc Check(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      get: "/health"
+    };
+  };
 }
