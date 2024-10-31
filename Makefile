@@ -1,9 +1,3 @@
-build:
-	go build -v ./...
-
-analyze:
-	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-
 test:
 	go test ./...
 
