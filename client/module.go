@@ -1,6 +1,9 @@
 package client
 
-import "go.uber.org/fx"
+import (
+	"github.com/disco07/grpc-lib/protogen/gateway/go/health"
+	"go.uber.org/fx"
+)
 
 var Module = fx.Options(
 	fx.Provide(
@@ -9,5 +12,6 @@ var Module = fx.Options(
 	),
 	fx.Invoke(
 		startHTTPClient,
+		health.RegisterHealthServiceHandler,
 	),
 )
