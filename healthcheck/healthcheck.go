@@ -2,6 +2,7 @@ package healthcheck
 
 import (
 	"context"
+
 	"github.com/disco07/grpc-lib/protogen/go/health"
 	"github.com/golang/protobuf/ptypes/empty"
 )
