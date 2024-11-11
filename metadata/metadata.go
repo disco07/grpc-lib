@@ -27,7 +27,12 @@ func ExtractMetadataFromContext(ctx context.Context) *Metadata {
 
 	// Extraire l'adresse IP
 	if p, ok := peer.FromContext(ctx); ok {
-		m.IP, _, _ = net.SplitHostPort(p.Addr.String())
+		var err error
+
+		m.IP, _, err = net.SplitHostPort(p.Addr.String())
+		if err != nil {
+			log.Println("Erreur lors de la récupération de l'adresse IP", err)
+		}
 	}
 
 	// Extraire le User-Agent
