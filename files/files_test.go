@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/textproto"
 	"testing"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stretchr/testify/assert"
@@ -14,11 +15,17 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+type Metadata struct {
+	Name  string    `form:"name" json:"name"`
+	Age   int       `form:"age" json:"age"`
+	Price float64   `form:"price" json:"price"`
+	Date  time.Time `form:"date" json:"date"`
+}
+
 // Exemple de struct pour mapper les données du formulaire
 type TestStruct struct {
-	Name  string                  `form:"name"`
-	Age   int                     `form:"age"`
-	Files []*multipart.FileHeader `form:"files"`
+	Metadata Metadata                `form:"metadata"`
+	Files    []*multipart.FileHeader `form:"files"`
 }
 
 func TestParseMultipartForm(t *testing.T) {
@@ -26,12 +33,11 @@ func TestParseMultipartForm(t *testing.T) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	// Ajouter un champ texte
-	err := writer.WriteField("name", "John Doe")
+	metadataWriter, err := writer.CreateFormField("metadata")
 	assert.NoError(t, err)
 
-	// Ajouter un champ numérique
-	err = writer.WriteField("age", "30")
+	data := `{"name": "John Doe", "age":30, "price":100.0, "date":"2000-01-01T00:00:00Z"}`
+	_, err = metadataWriter.Write([]byte(data))
 	assert.NoError(t, err)
 
 	// Ajouter un fichier
@@ -75,8 +81,10 @@ func TestParseMultipartForm(t *testing.T) {
 	}
 
 	// Vérifications des résultats
-	assert.Equal(t, "John Doe", result.Name, "Le champ Name doit être mappé correctement")
-	assert.Equal(t, 30, result.Age, "Le champ Age doit être mappé correctement")
+	assert.Equal(t, "John Doe", result.Metadata.Name, "Le champ Name doit être mappé correctement")
+	assert.Equal(t, 30, result.Metadata.Age, "Le champ Age doit être mappé correctement")
+	assert.Equal(t, 100.0, result.Metadata.Price, "Le champ Price doit être mappé correctement")
+	assert.Equal(t, "2000-01-01T00:00:00Z", result.Metadata.Date.Format(time.RFC3339), "Le champ Date doit être mappé correctement")
 	if assert.NotNil(t, result.Files) && assert.Len(t, result.Files, 1) {
 		assert.Equal(t, "test.txt", result.Files[0].Filename, "Le fichier doit être correctement identifié")
 	}
