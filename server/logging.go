@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -10,12 +11,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Color constants
+// ANSI color codes
 const (
 	Reset  = "\033[0m"
 	Green  = "\033[32m"
-	Red    = "\033[31m"
 	Yellow = "\033[33m"
+	Red    = "\033[31m"
+	Blue   = "\033[34m"
 )
 
 // getStatusColor returns the color for a given status code
@@ -40,6 +42,11 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
+		// Skip logging for specific methods
+		if info.FullMethod == "/health.HealthService/Check" {
+			return handler(ctx, req)
+		}
+
 		start := time.Now()
 		resp, err := handler(ctx, req)
 		duration := time.Since(start)
@@ -48,17 +55,17 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		// Get color based on the status code
 		color := getStatusColor(code)
 
-		// Log format
-		log.Printf(
-			"%sMethod: %s | Status: %v | Duration: %v | Error: %v%s",
-			color,
+		// Construct log message
+		statusMessage := fmt.Sprintf("%s%-8s%s", color, code.String(), Reset)
+		logMessage := fmt.Sprintf(
+			"%s[%s] %sMethod: %s%s\n%sDuration: %v | Status: %s | Error: %v%s\n",
+			Blue, time.Now().Format("2006-01-02 15:04:05"), Reset,
 			info.FullMethod,
-			code,
-			duration,
-			err,
 			Reset,
+			" ", duration, statusMessage, err, Reset,
 		)
 
+		log.Println(logMessage)
 		return resp, err
 	}
 }
