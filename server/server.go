@@ -34,6 +34,7 @@ func newGPRCServer(lifecycle fx.Lifecycle, logger *slog.Logger, config GRPCConfi
 		keepaliveOptions,
 		keepaliveEnforcementOptions,
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+		grpc.UnaryInterceptor(LoggingInterceptor()),
 	)
 
 	lifecycle.Append(fx.Hook{
