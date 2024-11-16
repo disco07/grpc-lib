@@ -17,7 +17,6 @@ const (
 	BgGreen  = "\033[42m"
 	BgYellow = "\033[43m"
 	BgRed    = "\033[41m"
-	BgBlue   = "\033[44m" // Optional for additional customization
 	FgWhite  = "\033[97m"
 )
 
@@ -33,6 +32,11 @@ func getStatusColor(code codes.Code) string {
 	default:
 		return BgRed
 	}
+}
+
+// padStatus formats the status string to have fixed width with padding
+func padStatus(status string) string {
+	return fmt.Sprintf(" %-7s ", status) // Fixed width of 7 characters
 }
 
 // LoggingInterceptor logs the details of each request and response
@@ -57,7 +61,7 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		color := getStatusColor(code)
 
 		// Format the log message
-		statusMessage := fmt.Sprintf("%s%s %-8s %s", color, FgWhite, code.String(), Reset)
+		statusMessage := fmt.Sprintf("%s%s%s%s", color, FgWhite, padStatus(code.String()), Reset)
 		logMessage := fmt.Sprintf(
 			"[%s] Method: %s\nDuration: %v | Status: %s | Error: %v\n",
 			time.Now().Format("2006-01-02 15:04:05"),
