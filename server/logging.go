@@ -59,7 +59,7 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		// Format the log message
 		statusMessage := fmt.Sprintf("%s%s %-8s %s", color, FgWhite, code.String(), Reset)
 		logMessage := fmt.Sprintf(
-			"[%s] Method: %s\nDuration: %v | Status: %s | Error: %v\n",
+			"[%s] Method: %s | Duration: %v | Status: %s | Error: %v\n",
 			time.Now().Format("2006-01-02 15:04:05"),
 			info.FullMethod,
 			duration,
