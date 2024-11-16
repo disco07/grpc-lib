@@ -36,7 +36,11 @@ func ExtractMetadataFromContext(ctx context.Context) *Metadata {
 
 	// Extraire le User-Agent
 	if userAgents := md.Get(grpcGatewayUserAgentHeader); len(userAgents) > 0 {
-		m.UserAgent = userAgents[0]
+		if strings.Contains(userAgents[0], ",") {
+			m.UserAgent = strings.TrimSpace(strings.Split(userAgents[0], ",")[0])
+		} else {
+			m.UserAgent = userAgents[0]
+		}
 	}
 
 	// Extraire le Bearer token
