@@ -3,11 +3,15 @@ package metadata
 import (
 	"context"
 	"log"
-	"net"
 	"strings"
 
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/peer"
+)
+
+const (
+	grpcGatewayUserAgentHeader = "grpcgateway-user-agent"
+	xForwardedForHeader        = "x-forwarded-for"
+	authorization              = "authorization"
 )
 
 type Metadata struct {
@@ -26,22 +30,17 @@ func ExtractMetadataFromContext(ctx context.Context) *Metadata {
 	m := &Metadata{}
 
 	// Extraire l'adresse IP
-	if p, ok := peer.FromContext(ctx); ok {
-		var err error
-
-		m.IP, _, err = net.SplitHostPort(p.Addr.String())
-		if err != nil {
-			log.Println("Erreur lors de la récupération de l'adresse IP", err)
-		}
+	if ip := md.Get(xForwardedForHeader); len(ip) > 0 {
+		m.IP = ip[0]
 	}
 
 	// Extraire le User-Agent
-	if userAgents, ok := md["user-agent"]; ok && len(userAgents) > 0 {
+	if userAgents := md.Get(grpcGatewayUserAgentHeader); len(userAgents) > 0 {
 		m.UserAgent = userAgents[0]
 	}
 
 	// Extraire le Bearer token
-	if authHeaders, ok := md["authorization"]; ok && len(authHeaders) > 0 {
+	if authHeaders := md.Get(authorization); len(authHeaders) > 0 {
 		for _, authHeader := range authHeaders {
 			if strings.HasPrefix(authHeader, "Bearer ") {
 				m.Bearer = strings.TrimPrefix(authHeader, "Bearer ")
