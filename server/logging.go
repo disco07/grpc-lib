@@ -11,26 +11,27 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// ANSI color codes
+// ANSI color codes for background
 const (
-	Reset  = "\033[0m"
-	Green  = "\033[32m"
-	Yellow = "\033[33m"
-	Red    = "\033[31m"
-	Blue   = "\033[34m"
+	Reset    = "\033[0m"
+	BgGreen  = "\033[42m"
+	BgYellow = "\033[43m"
+	BgRed    = "\033[41m"
+	BgBlue   = "\033[44m" // Optional for additional customization
+	FgWhite  = "\033[97m"
 )
 
-// getStatusColor returns the color for a given status code
+// getStatusColor returns the background color for a given status code
 func getStatusColor(code codes.Code) string {
 	switch {
 	case code == codes.OK:
-		return Green
+		return BgGreen
 	case code == codes.Canceled || code == codes.InvalidArgument || code == codes.NotFound || code == codes.AlreadyExists || code == codes.PermissionDenied:
-		return Yellow
+		return BgYellow
 	case code == codes.Internal || code == codes.Unavailable || code == codes.DataLoss || code == codes.Unauthenticated:
-		return Red
+		return BgRed
 	default:
-		return Red
+		return BgRed
 	}
 }
 
@@ -52,17 +53,18 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		duration := time.Since(start)
 		code := status.Code(err)
 
-		// Get color based on the status code
+		// Get background color based on the status code
 		color := getStatusColor(code)
 
-		// Construct log message
-		statusMessage := fmt.Sprintf("%s%-8s%s", color, code.String(), Reset)
+		// Format the log message
+		statusMessage := fmt.Sprintf("%s%s %-8s %s", color, FgWhite, code.String(), Reset)
 		logMessage := fmt.Sprintf(
-			"%s[%s] %sMethod: %s%s\n%sDuration: %v | Status: %s | Error: %v%s\n",
-			Blue, time.Now().Format("2006-01-02 15:04:05"), Reset,
+			"[%s] Method: %s\nDuration: %v | Status: %s | Error: %v\n",
+			time.Now().Format("2006-01-02 15:04:05"),
 			info.FullMethod,
-			Reset,
-			" ", duration, statusMessage, err, Reset,
+			duration,
+			statusMessage,
+			err,
 		)
 
 		log.Println(logMessage)
