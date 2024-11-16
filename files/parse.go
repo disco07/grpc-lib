@@ -10,8 +10,8 @@ import (
 	"google.golang.org/genproto/googleapis/api/httpbody"
 )
 
-func ParseMultipartForm[T any](ctx context.Context, body *httpbody.HttpBody) (T, error) {
-	var dst T
+func ParseMultipartForm[T any](ctx context.Context, body *httpbody.HttpBody) (*T, error) {
+	dst := new(T)
 
 	formData, err := NewFormData(ctx, body)
 	if err != nil {
@@ -36,7 +36,7 @@ func ParseMultipartForm[T any](ctx context.Context, body *httpbody.HttpBody) (T,
 		}
 	}
 
-	err = mapToStruct(data, reflect.ValueOf(&dst).Elem())
+	err = mapToStruct(data, dst)
 	if err != nil {
 		return dst, err
 	}
@@ -119,7 +119,7 @@ func setFieldValue(fieldVal reflect.Value, valueStr any, dataValType ...reflect.
 	case reflect.Bool:
 		boolValue, err := strconv.ParseBool(valueStr.(string))
 		if err != nil {
-			return errors.New("Failed to parse bool")
+			return errors.New("failed to parse bool")
 		}
 
 		fieldVal.SetBool(boolValue)
@@ -147,7 +147,7 @@ func setFieldValue(fieldVal reflect.Value, valueStr any, dataValType ...reflect.
 	case reflect.Map:
 		if fieldVal.Type().Key().Kind() == reflect.String {
 			if err := json.Unmarshal([]byte(valueStr.(string)), fieldVal.Addr().Interface()); err != nil {
-				return errors.New("Failed to unmarshal map")
+				return errors.New("failed to unmarshal map")
 			}
 		} else {
 			return errors.New("Unsupported map key type " + fieldVal.Type().Key().Kind().String())
@@ -166,7 +166,7 @@ func setFieldValue(fieldVal reflect.Value, valueStr any, dataValType ...reflect.
 func setIntValue(fieldVal reflect.Value, valueStr string) error {
 	intValue, err := strconv.ParseInt(valueStr, 10, fieldVal.Type().Bits())
 	if err != nil {
-		return errors.New("Failed to parse int")
+		return errors.New("failed to parse int")
 	}
 
 	fieldVal.SetInt(intValue)
@@ -177,7 +177,7 @@ func setIntValue(fieldVal reflect.Value, valueStr string) error {
 func setUintValue(fieldVal reflect.Value, valueStr string) error {
 	uintValue, err := strconv.ParseUint(valueStr, 10, fieldVal.Type().Bits())
 	if err != nil {
-		return errors.New("Failed to parse uint")
+		return errors.New("failed to parse uint")
 	}
 
 	fieldVal.SetUint(uintValue)
@@ -188,7 +188,7 @@ func setUintValue(fieldVal reflect.Value, valueStr string) error {
 func setFloatValue(fieldVal reflect.Value, valueStr string) error {
 	floatValue, err := strconv.ParseFloat(valueStr, fieldVal.Type().Bits())
 	if err != nil {
-		return errors.New("Failed to parse float")
+		return errors.New("failed to parse float")
 	}
 
 	fieldVal.SetFloat(floatValue)

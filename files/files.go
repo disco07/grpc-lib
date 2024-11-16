@@ -3,16 +3,18 @@ package files
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"google.golang.org/genproto/googleapis/api/httpbody"
-	"google.golang.org/grpc/metadata"
 	"io"
 	"mime"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"sync"
+
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/genproto/googleapis/api/httpbody"
+	"google.golang.org/grpc/metadata"
 )
 
 const (
@@ -20,21 +22,24 @@ const (
 	maxMemory      = 32 << 20 // 32 MB. parameter for ReadForm.
 )
 
-var (
-	ErrSizeLimitExceeded = fmt.Errorf("size limit exceeded")
-)
+var ErrSizeLimitExceeded = errors.New("size limit exceeded")
 
 func copyZeroAlloc(w io.Writer, r io.Reader) (int64, error) {
 	if wt, ok := r.(io.WriterTo); ok {
 		return wt.WriteTo(w)
 	}
+
 	if rt, ok := w.(io.ReaderFrom); ok {
 		return rt.ReadFrom(r)
 	}
+
 	vbuf := copyBufPool.Get()
 	buf := vbuf.([]byte)
+
 	n, err := io.CopyBuffer(w, r, buf)
+
 	copyBufPool.Put(vbuf)
+
 	return n, err
 }
 
@@ -50,6 +55,7 @@ func SaveMultipartFile(fh *multipart.FileHeader, path string) (err error) {
 		f  multipart.File
 		ff *os.File
 	)
+
 	f, err = fh.Open()
 	if err != nil {
 		return
@@ -84,13 +90,16 @@ func SaveMultipartFile(fh *multipart.FileHeader, path string) (err error) {
 	if ff, err = os.Create(path); err != nil {
 		return
 	}
+
 	defer func() {
 		e := ff.Close()
 		if err == nil {
 			err = e
 		}
 	}()
+
 	_, err = copyZeroAlloc(ff, f)
+
 	return
 }
 
@@ -123,7 +132,7 @@ func (f *FormData) Files(key string) ([]*multipart.FileHeader, error) {
 
 	for _, file := range files {
 		if file.Filename == "" {
-			return nil, fmt.Errorf("filename is empty")
+			return nil, errors.New("filename is empty")
 		}
 	}
 
@@ -138,6 +147,7 @@ func (f *FormData) RemoveAll() error {
 func extractBoundaryFromContext(ctx context.Context) (string, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	contentType := md.Get(fmt.Sprintf("%s%s", runtime.MetadataPrefix, "content-type"))
+
 	if len(contentType) == 0 {
 		return "", http.ErrNotMultipart
 	}
@@ -151,5 +161,6 @@ func extractBoundaryFromContext(ctx context.Context) (string, error) {
 	if !ok {
 		return "", http.ErrMissingBoundary
 	}
+
 	return boundary, nil
 }
