@@ -32,9 +32,9 @@ func ExtractMetadataFromContext(ctx context.Context) *Metadata {
 	// Extraire l'adresse IP
 	if ip := md.Get(xForwardedForHeader); len(ip) > 0 {
 		if strings.Contains(ip[0], ",") {
-			m.UserAgent = strings.TrimSpace(strings.Split(ip[0], ",")[0])
+			m.IP = strings.TrimSpace(strings.Split(ip[0], ",")[0])
 		} else {
-			m.UserAgent = ip[0]
+			m.IP = ip[0]
 		}
 	}
 
