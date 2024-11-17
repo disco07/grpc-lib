@@ -31,16 +31,16 @@ func ExtractMetadataFromContext(ctx context.Context) *Metadata {
 
 	// Extraire l'adresse IP
 	if ip := md.Get(xForwardedForHeader); len(ip) > 0 {
-		m.IP = ip[0]
+		if strings.Contains(ip[0], ",") {
+			m.IP = strings.TrimSpace(strings.Split(ip[0], ",")[0])
+		} else {
+			m.IP = ip[0]
+		}
 	}
 
 	// Extraire le User-Agent
 	if userAgents := md.Get(grpcGatewayUserAgentHeader); len(userAgents) > 0 {
-		if strings.Contains(userAgents[0], ",") {
-			m.UserAgent = strings.TrimSpace(strings.Split(userAgents[0], ",")[0])
-		} else {
-			m.UserAgent = userAgents[0]
-		}
+		m.UserAgent = userAgents[0]
 	}
 
 	// Extraire le Bearer token
