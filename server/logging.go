@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"google.golang.org/grpc"
@@ -71,7 +70,8 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 			err,
 		)
 
-		log.Println(logMessage)
+		fmt.Println(logMessage)
+
 		return resp, err
 	}
 }
