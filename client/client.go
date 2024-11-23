@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"github.com/disco07/grpc-lib/marshal"
 	"log"
 	"net/http"
 
@@ -35,7 +36,9 @@ func newGRPCClientConn(lc fx.Lifecycle, grpcServerConfig server.GRPCConfigServer
 }
 
 func newServeMux() *runtime.ServeMux {
-	return runtime.NewServeMux()
+	return runtime.NewServeMux(
+		marshal.WithMultipartFormMarshaler(),
+	)
 }
 
 func startHTTPClient(lc fx.Lifecycle, mux *runtime.ServeMux, config GRPCConfigClient) {
