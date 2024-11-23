@@ -8,6 +8,9 @@ import (
 	"io"
 )
 
+// 32 MB
+const defaultBytesSize = 32 << 20
+
 // WithMultipartFormMarshaler returns a ServeMuxOption which associates inbound and outbound Marshalers to a MIME type in mux.
 func WithMultipartFormMarshaler() runtime.ServeMuxOption {
 	return runtime.WithMarshalerOption("multipart/form-data", &multipartFormMarshaler{
@@ -26,9 +29,9 @@ type multipartFormMarshaler struct {
 
 func (h *multipartFormMarshaler) NewDecoder(r io.Reader) runtime.Decoder {
 	return &multipartFormDecoder{
-		Decoder: h.HTTPBodyMarshaler.NewDecoder(r),
+		Decoder: h.Marshaler.NewDecoder(r),
 		body:    r,
-		buf:     make([]byte, 0, 512),
+		buf:     make([]byte, defaultBytesSize),
 		eof:     false,
 	}
 }
