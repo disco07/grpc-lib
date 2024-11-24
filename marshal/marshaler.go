@@ -2,10 +2,11 @@ package marshal
 
 import (
 	"errors"
+	"io"
+
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/genproto/googleapis/api/httpbody"
 	"google.golang.org/protobuf/encoding/protojson"
-	"io"
 )
 
 // 32 MB
