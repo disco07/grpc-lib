@@ -46,7 +46,10 @@ func startHTTPClient(lc fx.Lifecycle, mux *runtime.ServeMux, config GRPCConfigCl
 		OnStart: func(ctx context.Context) error {
 			go func() {
 				fmt.Println("API gateway server is running on " + fmt.Sprintf(":%d", config.Port()))
-				if err := http.ListenAndServe(fmt.Sprintf(":%d", config.Port()), mux); err != nil {
+				if err := http.ListenAndServe(
+					fmt.Sprintf(":%d", config.Port()),
+					withCORS(mux),
+				); err != nil {
 					log.Fatalf("gateway server closed abruptly: %v", err)
 				}
 			}()
