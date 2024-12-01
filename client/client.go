@@ -17,7 +17,7 @@ import (
 
 func newGRPCClientConn(lc fx.Lifecycle, grpcServerConfig server.GRPCConfigServer) (*grpc.ClientConn, error) {
 	conn, err := grpc.NewClient(
-		fmt.Sprintf(":%d", grpcServerConfig.Port()),
+		grpcServerConfig.Host(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
